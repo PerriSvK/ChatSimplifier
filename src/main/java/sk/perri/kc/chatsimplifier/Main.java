@@ -42,7 +42,7 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor
         getLogger().info("Plugin sa deaktivioval");
     }
 
-    @EventHandler(priority = EventPriority.HIGHEST)
+    @EventHandler(priority = EventPriority.LOWEST)
     public void onChatMessage(AsyncPlayerChatEvent event)
     {
 
@@ -75,25 +75,27 @@ public class Main extends JavaPlugin implements Listener, CommandExecutor
         for(String slovo : msg.split(" "))
         {
             res.append(res.length() > 0 ? " " : "");
-            if(blacklist.contains(slovo))
+            if(blacklist.contains(ChatColor.stripColor(slovo)))
                 res.append(Strings.repeat(getConfig().getString("block-char"), slovo.length()));
             else
                 res.append(slovo);
         }
 
         // Check busy
-        boolean cancel = false;
+        boolean cancel[] = {false};
 
         for(String slovo : msg.split(" "))
         {
-            if(busy.contains(slovo.toLowerCase()))
+            busy.forEach(k ->
             {
-                cancel = true;
-                break;
-            }
+                if(slovo.toLowerCase().contains(k))
+                {
+                    cancel[0] = true;
+                }
+            });
         }
 
-        if(cancel && !event.getPlayer().hasPermission("chatsimplifier.overbusy"))
+        if(cancel[0] && !event.getPlayer().hasPermission("chatsimplifier.overbusy"))
         {
             event.getPlayer().sendMessage(
                 ChatColor.translateAlternateColorCodes('&', getConfig().getString("msg.busy-msg")));
