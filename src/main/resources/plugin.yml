@@ -1,0 +1,5 @@
+name: ${project.name}
+main: sk.perri.kc.chatsimplifier.Main
+version: ${project.version}
+author: Perri
+description: ${project.description}

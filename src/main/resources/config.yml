@@ -1,0 +1,5 @@
+char-trash-holder: 4 # how many chars need to trigger simplifier
+block-char: "*"
+blacklist:
+  - "idiot"
+  - "dog"
