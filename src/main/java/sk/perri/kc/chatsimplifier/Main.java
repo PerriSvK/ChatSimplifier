@@ -1,18 +1,25 @@
 package sk.perri.kc.chatsimplifier;
 
 import com.google.common.base.Strings;
+import org.bukkit.ChatColor;
+import org.bukkit.command.Command;
+import org.bukkit.command.CommandExecutor;
+import org.bukkit.command.CommandSender;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
+import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class Main extends JavaPlugin implements Listener
+public class Main extends JavaPlugin implements Listener, CommandExecutor
 {
     static Main self;
     List<String> blacklist;
+    List<String> busy = new ArrayList<>();
 
     public void onEnable()
     {
@@ -25,6 +32,7 @@ public class Main extends JavaPlugin implements Listener
         blacklist = getConfig().getStringList("blacklist");
 
         getServer().getPluginManager().registerEvents(this, this);
+        getCommand("busy").setExecutor(this);
 
         getLogger().info("Plugin sa aktivoval");
     }
@@ -37,6 +45,8 @@ public class Main extends JavaPlugin implements Listener
     @EventHandler(priority = EventPriority.HIGHEST)
     public void onChatMessage(AsyncPlayerChatEvent event)
     {
+
+        // Check multiple chars
         String msg = event.getMessage();
         StringBuilder sb = new StringBuilder();
 
@@ -57,9 +67,9 @@ public class Main extends JavaPlugin implements Listener
 
             sb.append(s);
         }
-
         msg = sb.toString();
 
+        // Check blacklist
         StringBuilder res = new StringBuilder();
 
         for(String slovo : msg.split(" "))
@@ -71,6 +81,50 @@ public class Main extends JavaPlugin implements Listener
                 res.append(slovo);
         }
 
+        // Check busy
+        boolean cancel = false;
+
+        for(String slovo : msg.split(" "))
+        {
+            if(busy.contains(slovo.toLowerCase()))
+            {
+                cancel = true;
+                break;
+            }
+        }
+
+        if(cancel && !event.getPlayer().hasPermission("chatsimplifier.overbusy"))
+        {
+            event.getPlayer().sendMessage(
+                ChatColor.translateAlternateColorCodes('&', getConfig().getString("msg.busy-msg")));
+            event.setCancelled(true);
+        }
+
         event.setMessage(res.toString());
+    }
+
+    @Override
+    public boolean onCommand(CommandSender sender, Command cmd, String label, String[] args)
+    {
+        if(cmd.getName().equalsIgnoreCase("busy"))
+        {
+            if(sender.hasPermission("chatsimplifier.busy"))
+            {
+                if(busy.contains(sender.getName().toLowerCase()))
+                {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        getConfig().getString("msg.busy-off")));
+                    busy.remove(sender.getName().toLowerCase());
+                }
+                else
+                {
+                    sender.sendMessage(ChatColor.translateAlternateColorCodes('&',
+                        getConfig().getString("msg.busy-on")));
+                    busy.add(sender.getName().toLowerCase());
+                }
+            }
+        }
+
+        return true;
     }
 }

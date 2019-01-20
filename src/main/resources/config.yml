@@ -3,3 +3,7 @@ block-char: "*"
 blacklist:
   - "idiot"
   - "dog"
+msg:
+  busy-on: "&4&lBusy &7mod &azapnuty"
+  busy-off: "&4&lBusy &7mod &azvypnuty"
+  busy-msg: "&7Tento hrac je aktualne zaneprazdneny. Vyskusaj neskor"

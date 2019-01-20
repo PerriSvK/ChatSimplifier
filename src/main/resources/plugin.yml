@@ -3,3 +3,13 @@ main: sk.perri.kc.chatsimplifier.Main
 version: ${project.version}
 author: Perri
 description: ${project.description}
+commands:
+  busy:
+    aliases: [zaneprazdnen]
+    description: toggle busy mode
+    usage: /busy
+permissions:
+  chatsimplifier.busy:
+    default: op
+  chatsimplifier.overbusy:
+    default: op
